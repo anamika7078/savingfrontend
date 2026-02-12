@@ -6,7 +6,7 @@ const nextConfig = {
         domains: ['localhost'],
     },
     env: {
-        NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://savings-1-liz5.onrender.com' || 'http://localhost:5000/api',
+        NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://savings-1-liz5.onrender.com/api',
     },
     async redirects() {
         return [

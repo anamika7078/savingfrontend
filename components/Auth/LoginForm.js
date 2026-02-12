@@ -28,9 +28,15 @@ export default function LoginForm() {
         setError('');
 
         try {
-            await login(formData);
+            console.log('Attempting login with:', formData);
+            const result = await login(formData);
+            console.log('Login successful, result:', result);
+            console.log('Token stored:', localStorage.getItem('token'));
+            console.log('User stored:', localStorage.getItem('user'));
+            console.log('Redirecting to dashboard...');
             router.push('/dashboard');
         } catch (err) {
+            console.error('Login error:', err);
             setError(getErrorMessage(err));
         } finally {
             setLoading(false);

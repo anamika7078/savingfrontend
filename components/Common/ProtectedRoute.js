@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { isAuthenticated, getCurrentUser } from '../../lib/auth';
 
 export default function ProtectedRoute({ children, adminOnly = false }) {
     const [loading, setLoading] = useState(true);
@@ -9,25 +8,33 @@ export default function ProtectedRoute({ children, adminOnly = false }) {
     const router = useRouter();
 
     useEffect(() => {
-        const checkAuth = () => {
-            const authenticated = isAuthenticated();
-            const user = getCurrentUser();
+        // Small delay to ensure localStorage is available
+        const timer = setTimeout(() => {
+            const token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            const user = userStr ? JSON.parse(userStr) : null;
 
-            if (!authenticated) {
+            console.log('ProtectedRoute - Token exists:', !!token);
+            console.log('ProtectedRoute - User:', user);
+
+            if (!token) {
+                console.log('ProtectedRoute: No token, redirecting to login');
                 router.push('/auth/login');
                 return;
             }
 
             if (adminOnly && user?.role !== 'admin') {
+                console.log('ProtectedRoute: Not admin, redirecting to dashboard');
                 router.push('/dashboard');
                 return;
             }
 
+            console.log('ProtectedRoute: Authorized');
             setAuthorized(true);
             setLoading(false);
-        };
+        }, 100);
 
-        checkAuth();
+        return () => clearTimeout(timer);
     }, [router, adminOnly]);
 
     if (loading) {

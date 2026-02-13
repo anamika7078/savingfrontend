@@ -59,9 +59,9 @@ export default function MonthlySavings() {
     };
 
     const filteredMonthlySavings = monthlySavings.filter(saving => {
-        const matchesSearch = saving.member?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            saving.member?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            saving.member?.memberId?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = saving.memberId?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            saving.memberId?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            saving.memberId?.memberId?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus = filterStatus === 'all' || saving.paymentStatus === filterStatus;
         const matchesMonth = !filterMonth || saving.savingMonth === filterMonth;
         const matchesYear = !filterYear || saving.savingYear === filterYear;
@@ -194,8 +194,8 @@ export default function MonthlySavings() {
                                     {filteredMonthlySavings.map((saving) => (
                                         <tr key={saving.id}>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {saving.member?.firstName} {saving.member?.lastName}
-                                                <div className="text-xs text-gray-500">{saving.member?.memberId}</div>
+                                                {saving.memberId?.firstName} {saving.memberId?.lastName}
+                                                <div className="text-xs text-gray-500">{saving.memberId?.memberId}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {new Date(2000, parseInt(saving.savingMonth) - 1).toLocaleString('default', { month: 'long' })}
@@ -217,8 +217,8 @@ export default function MonthlySavings() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${saving.paymentStatus === 'paid'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-red-100 text-red-800'
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-red-100 text-red-800'
                                                     }`}>
                                                     {saving.paymentStatus}
                                                 </span>

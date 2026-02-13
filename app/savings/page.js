@@ -29,28 +29,28 @@ export default function Savings() {
             setLoading(true);
             const params = {};
             if (filterStatus && filterStatus !== 'all') {
-                params.status = filterStatus;
+                params.paymentStatus = filterStatus;
             }
 
-            const response = await savingsAPI.getAll(params);
-            console.log('Savings API response:', response);
+            const response = await savingsAPI.getAllMonthlySavings(params);
+            console.log('Monthly savings API response:', response);
 
             // Handle different response structures
             let savingsData = [];
-            if (response && response.data && response.data.savings) {
-                savingsData = response.data.savings;
-            } else if (response && response.savings) {
-                savingsData = response.savings;
+            if (response && response.data && response.data.monthlySavings) {
+                savingsData = response.data.monthlySavings;
+            } else if (response && response.monthlySavings) {
+                savingsData = response.monthlySavings;
             } else if (Array.isArray(response)) {
                 savingsData = response;
             } else if (response && Array.isArray(response.data)) {
                 savingsData = response.data;
             }
 
-            console.log('Processed savings data:', savingsData);
+            console.log('Processed monthly savings data:', savingsData);
             setSavings(savingsData);
         } catch (error) {
-            console.error('Error fetching savings:', error);
+            console.error('Error fetching monthly savings:', error);
             setSavings([]);
         } finally {
             setLoading(false);
@@ -74,10 +74,12 @@ export default function Savings() {
     };
 
     const filteredSavings = savings.filter(saving => {
-        const matchesSearch = saving.member?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            saving.member?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            saving.accountNumber?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesFilter = filterStatus === 'all' || saving.status === filterStatus;
+        const matchesSearch = saving.memberId?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            saving.memberId?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            saving.memberId?.memberId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            saving.savingMonth?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            saving.savingYear?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesFilter = filterStatus === 'all' || saving.paymentStatus === filterStatus;
         return matchesSearch && matchesFilter;
     });
 
@@ -85,7 +87,7 @@ export default function Savings() {
         return (
             <ProtectedRoute>
                 <Layout>
-                    <Loader text="Loading savings accounts..." />
+                    <Loader text="Loading monthly savings..." />
                 </Layout>
             </ProtectedRoute>
         );
@@ -96,9 +98,9 @@ export default function Savings() {
             <Layout>
                 <div className="p-6">
                     <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-2xl font-bold">Savings Accounts</h1>
+                        <h1 className="text-2xl font-bold">Monthly Savings</h1>
                         <CustomButton variant="primary" onClick={handleAddSavings}>
-                            Add Savings Account
+                            Add Monthly Savings
                         </CustomButton>
                     </div>
 
@@ -109,7 +111,7 @@ export default function Savings() {
                                 <div>
                                     <input
                                         type="text"
-                                        placeholder="Search by member name or account number..."
+                                        placeholder="Search by member name, ID, month, or year..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -122,9 +124,8 @@ export default function Savings() {
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     >
                                         <option value="all">All Status</option>
-                                        <option value="active">Active</option>
-                                        <option value="inactive">Inactive</option>
-                                        <option value="frozen">Frozen</option>
+                                        <option value="paid">Paid</option>
+                                        <option value="unpaid">Unpaid</option>
                                     </select>
                                 </div>
                                 <div>
@@ -143,25 +144,25 @@ export default function Savings() {
                                 <thead className="bg-gray-50">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Account Number
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Member
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Type
+                                            Month
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Balance
+                                            Year
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Interest Rate
+                                            Monthly Amount
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Status
+                                            Total Payable
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Opened Date
+                                            Payment Status
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Payment Date
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Actions
@@ -172,51 +173,36 @@ export default function Savings() {
                                     {filteredSavings.map((saving) => (
                                         <tr key={saving.id}>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {saving.accountNumber}
+                                                {saving.memberId?.firstName} {saving.memberId?.lastName}
+                                                <div className="text-xs text-gray-500">{saving.memberId?.memberId}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {saving.member?.firstName} {saving.member?.lastName}
+                                                {saving.savingMonth}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <span className="capitalize">{saving.accountType}</span>
+                                                {saving.savingYear}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {formatCurrency(saving.balance)}
+                                                {formatCurrency(saving.monthlyFixedAmount)}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {saving.interestRate}%
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {formatCurrency(saving.totalPayableAmount)}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadge(saving.status)}`}>
-                                                    {saving.status}
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadge(saving.paymentStatus)}`}>
+                                                    {saving.paymentStatus?.charAt(0).toUpperCase() + saving.paymentStatus?.slice(1)}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {formatDate(saving.createdAt)}
+                                                {saving.paymentDate ? formatDate(saving.paymentDate) : '-'}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <CustomButton
                                                     variant="outline"
                                                     size="sm"
-                                                    className="mr-2"
                                                     onClick={() => handleViewSavings(saving.id)}
                                                 >
                                                     View
-                                                </CustomButton>
-                                                <CustomButton
-                                                    variant="primary"
-                                                    size="sm"
-                                                    className="mr-2"
-                                                    onClick={() => handleDeposit(saving.id)}
-                                                >
-                                                    Deposit
-                                                </CustomButton>
-                                                <CustomButton
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleWithdraw(saving.id)}
-                                                >
-                                                    Withdraw
                                                 </CustomButton>
                                             </td>
                                         </tr>
@@ -225,7 +211,7 @@ export default function Savings() {
                             </table>
                             {filteredSavings.length === 0 && (
                                 <div className="text-center py-8 text-gray-500">
-                                    No savings accounts found
+                                    No monthly savings found
                                 </div>
                             )}
                         </div>

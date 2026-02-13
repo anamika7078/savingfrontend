@@ -32,6 +32,7 @@ export default function Savings() {
                 params.paymentStatus = filterStatus;
             }
 
+            console.log('Calling getAllMonthlySavings with params:', params);
             const response = await savingsAPI.getAllMonthlySavings(params);
             console.log('Monthly savings API response:', response);
 

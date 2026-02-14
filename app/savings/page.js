@@ -59,16 +59,19 @@ export default function Savings() {
             
             // The API interceptor returns response.data, so:
             // Backend sends: { success: true, data: { monthlySavings: [...], pagination: {...} } }
-            // After interceptor: { monthlySavings: [...], pagination: {...} }
+            // After interceptor extracts response.data: { monthlySavings: [...], pagination: {...} }
             let savingsData = [];
             
-            // Check all possible response structures
+            // Based on the actual API response from https://savings-2-ckrp.onrender.com/savings/monthly/all
+            // The response structure is: { success: true, data: { monthlySavings: [...], pagination: {...} } }
+            // After interceptor: { monthlySavings: [...], pagination: {...} }
+            
             if (response && response.monthlySavings && Array.isArray(response.monthlySavings)) {
                 // Expected structure after interceptor extracts response.data
                 savingsData = response.monthlySavings;
                 console.log('✅ SUCCESS: Extracted from response.monthlySavings:', savingsData.length, 'records');
             } else if (response && response.data && response.data.monthlySavings && Array.isArray(response.data.monthlySavings)) {
-                // If interceptor didn't extract data (shouldn't happen but handle it)
+                // If interceptor didn't extract data (double nested)
                 savingsData = response.data.monthlySavings;
                 console.log('✅ SUCCESS: Extracted from response.data.monthlySavings:', savingsData.length, 'records');
             } else if (response && response.data && Array.isArray(response.data)) {
@@ -82,7 +85,7 @@ export default function Savings() {
             } else {
                 // Debug the actual structure
                 console.error('❌ FAILED: Unexpected response structure');
-                console.error('Response:', response);
+                console.error('Full Response Object:', JSON.stringify(response, null, 2));
                 console.error('Response type:', typeof response);
                 console.error('Response keys:', response ? Object.keys(response) : 'null');
                 console.error('Response structure analysis:', {
@@ -99,7 +102,15 @@ export default function Savings() {
             console.log('📊 Processed monthly savings data:', savingsData);
             console.log('📊 Number of records:', savingsData.length);
             console.log('📊 First record sample:', savingsData[0]);
-            setSavings(savingsData || []);
+            
+            // Final check - ensure we have an array
+            if (!Array.isArray(savingsData)) {
+                console.error('❌ CRITICAL: savingsData is not an array!', savingsData);
+                savingsData = [];
+            }
+            
+            console.log('✅ Setting savings state with', savingsData.length, 'records');
+            setSavings(savingsData);
         } catch (error) {
             console.error('Error fetching monthly savings:', error);
             console.error('Error details:', {

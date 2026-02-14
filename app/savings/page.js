@@ -52,6 +52,16 @@ export default function Savings() {
             console.log('Calling getAllMonthlySavings with params:', params);
             console.log('API endpoint will be: /api/savings/monthly/all');
             
+            // Double-check token before making request
+            const tokenBeforeRequest = localStorage.getItem('token');
+            if (!tokenBeforeRequest) {
+                console.error('❌ CRITICAL: Token disappeared before API call!');
+                alert('Authentication error. Please login again.');
+                router.push('/auth/login');
+                return;
+            }
+            console.log('✅ Token verified before API call, length:', tokenBeforeRequest.length);
+            
             const response = await savingsAPI.getAllMonthlySavings(params);
             console.log('=== API RESPONSE RECEIVED ===');
             console.log('Monthly savings API response:', response);

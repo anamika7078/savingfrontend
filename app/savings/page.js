@@ -52,30 +52,48 @@ export default function Savings() {
             
             const response = await savingsAPI.getAllMonthlySavings(params);
             console.log('=== API RESPONSE RECEIVED ===');
-            console.log('Monthly savings API response:', response);
+            console.log('Full response:', JSON.stringify(response, null, 2));
             console.log('Response type:', typeof response);
             console.log('Response keys:', response ? Object.keys(response) : 'null');
+            console.log('Is array?', Array.isArray(response));
 
             // Handle different response structures
+            // The API interceptor returns response.data, so:
+            // Backend sends: { success: true, data: { monthlySavings: [...], pagination: {...} } }
+            // Interceptor extracts: { monthlySavings: [...], pagination: {...} }
             let savingsData = [];
-            if (response && response.data && response.data.monthlySavings) {
-                savingsData = response.data.monthlySavings;
-                console.log('Extracted from response.data.monthlySavings:', savingsData.length);
-            } else if (response && response.monthlySavings) {
+            
+            if (response && response.monthlySavings && Array.isArray(response.monthlySavings)) {
+                // Most likely structure after interceptor
                 savingsData = response.monthlySavings;
-                console.log('Extracted from response.monthlySavings:', savingsData.length);
-            } else if (Array.isArray(response)) {
-                savingsData = response;
-                console.log('Response is array:', savingsData.length);
-            } else if (response && Array.isArray(response.data)) {
+                console.log('✅ Extracted from response.monthlySavings:', savingsData.length);
+            } else if (response && response.data && response.data.monthlySavings && Array.isArray(response.data.monthlySavings)) {
+                // If interceptor didn't extract data
+                savingsData = response.data.monthlySavings;
+                console.log('✅ Extracted from response.data.monthlySavings:', savingsData.length);
+            } else if (response && response.data && Array.isArray(response.data)) {
+                // If data is directly an array
                 savingsData = response.data;
-                console.log('Extracted from response.data array:', savingsData.length);
+                console.log('✅ Extracted from response.data (array):', savingsData.length);
+            } else if (Array.isArray(response)) {
+                // If response is directly an array
+                savingsData = response;
+                console.log('✅ Response is directly an array:', savingsData.length);
             } else {
-                console.warn('Unexpected response structure:', response);
+                console.error('❌ Unexpected response structure:', response);
+                console.error('Response structure details:', {
+                    hasResponse: !!response,
+                    hasData: !!(response && response.data),
+                    hasMonthlySavings: !!(response && response.monthlySavings),
+                    hasDataMonthlySavings: !!(response && response.data && response.data.monthlySavings),
+                    isArray: Array.isArray(response),
+                    isDataArray: !!(response && response.data && Array.isArray(response.data))
+                });
             }
 
-            console.log('Processed monthly savings data:', savingsData);
-            console.log('Number of records:', savingsData.length);
+            console.log('📊 Processed monthly savings data:', savingsData);
+            console.log('📊 Number of records:', savingsData.length);
+            console.log('📊 First record sample:', savingsData[0]);
             setSavings(savingsData || []);
         } catch (error) {
             console.error('Error fetching monthly savings:', error);
@@ -116,7 +134,9 @@ export default function Savings() {
     };
 
     const filteredSavings = savings.filter(saving => {
-        const matchesSearch = saving.memberId?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        if (!saving) return false;
+        const matchesSearch = !searchTerm || 
+            saving.memberId?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             saving.memberId?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             saving.memberId?.memberId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             saving.savingMonth?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -124,6 +144,10 @@ export default function Savings() {
         const matchesFilter = filterStatus === 'all' || saving.paymentStatus === filterStatus;
         return matchesSearch && matchesFilter;
     });
+    
+    console.log('🔍 Filtered savings count:', filteredSavings.length, 'out of', savings.length);
+    console.log('🔍 Savings array:', savings);
+    console.log('🔍 First saving item:', savings[0]);
 
     if (loading) {
         return (
@@ -212,8 +236,9 @@ export default function Savings() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {filteredSavings.map((saving) => (
-                                        <tr key={saving.id}>
+                                    {filteredSavings.length > 0 ? (
+                                        filteredSavings.map((saving) => (
+                                            <tr key={saving.id || saving._id || Math.random()}>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                 {saving.memberId?.firstName} {saving.memberId?.lastName}
                                                 <div className="text-xs text-gray-500">{saving.memberId?.memberId}</div>
@@ -247,15 +272,17 @@ export default function Savings() {
                                                     View
                                                 </CustomButton>
                                             </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
+                                                No monthly savings found
+                                            </td>
                                         </tr>
-                                    ))}
+                                    )}
                                 </tbody>
                             </table>
-                            {filteredSavings.length === 0 && (
-                                <div className="text-center py-8 text-gray-500">
-                                    No monthly savings found
-                                </div>
-                            )}
                         </div>
                     </CardBox>
                 </div>

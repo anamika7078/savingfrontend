@@ -52,42 +52,47 @@ export default function Savings() {
             
             const response = await savingsAPI.getAllMonthlySavings(params);
             console.log('=== API RESPONSE RECEIVED ===');
-            console.log('Full response:', JSON.stringify(response, null, 2));
+            console.log('Full response object:', response);
             console.log('Response type:', typeof response);
-            console.log('Response keys:', response ? Object.keys(response) : 'null');
             console.log('Is array?', Array.isArray(response));
-
-            // Handle different response structures
+            console.log('Response keys:', response ? Object.keys(response) : 'null');
+            
             // The API interceptor returns response.data, so:
             // Backend sends: { success: true, data: { monthlySavings: [...], pagination: {...} } }
-            // Interceptor extracts: { monthlySavings: [...], pagination: {...} }
+            // After interceptor: { monthlySavings: [...], pagination: {...} }
             let savingsData = [];
             
+            // Check all possible response structures
             if (response && response.monthlySavings && Array.isArray(response.monthlySavings)) {
-                // Most likely structure after interceptor
+                // Expected structure after interceptor extracts response.data
                 savingsData = response.monthlySavings;
-                console.log('✅ Extracted from response.monthlySavings:', savingsData.length);
+                console.log('✅ SUCCESS: Extracted from response.monthlySavings:', savingsData.length, 'records');
             } else if (response && response.data && response.data.monthlySavings && Array.isArray(response.data.monthlySavings)) {
-                // If interceptor didn't extract data
+                // If interceptor didn't extract data (shouldn't happen but handle it)
                 savingsData = response.data.monthlySavings;
-                console.log('✅ Extracted from response.data.monthlySavings:', savingsData.length);
+                console.log('✅ SUCCESS: Extracted from response.data.monthlySavings:', savingsData.length, 'records');
             } else if (response && response.data && Array.isArray(response.data)) {
                 // If data is directly an array
                 savingsData = response.data;
-                console.log('✅ Extracted from response.data (array):', savingsData.length);
+                console.log('✅ SUCCESS: Extracted from response.data (array):', savingsData.length, 'records');
             } else if (Array.isArray(response)) {
                 // If response is directly an array
                 savingsData = response;
-                console.log('✅ Response is directly an array:', savingsData.length);
+                console.log('✅ SUCCESS: Response is directly an array:', savingsData.length, 'records');
             } else {
-                console.error('❌ Unexpected response structure:', response);
-                console.error('Response structure details:', {
+                // Debug the actual structure
+                console.error('❌ FAILED: Unexpected response structure');
+                console.error('Response:', response);
+                console.error('Response type:', typeof response);
+                console.error('Response keys:', response ? Object.keys(response) : 'null');
+                console.error('Response structure analysis:', {
                     hasResponse: !!response,
                     hasData: !!(response && response.data),
                     hasMonthlySavings: !!(response && response.monthlySavings),
                     hasDataMonthlySavings: !!(response && response.data && response.data.monthlySavings),
                     isArray: Array.isArray(response),
-                    isDataArray: !!(response && response.data && Array.isArray(response.data))
+                    isDataArray: !!(response && response.data && Array.isArray(response.data)),
+                    responseValue: response
                 });
             }
 

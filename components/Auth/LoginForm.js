@@ -32,15 +32,13 @@ export default function LoginForm() {
             const result = await login(formData);
             console.log('✅ Login successful, result:', result);
             
-            // Verify token is stored
-            const storedToken = localStorage.getItem('token');
+            // Verify user is stored
             const storedUser = localStorage.getItem('user');
-            console.log('📦 Token stored:', storedToken ? 'YES (' + storedToken.length + ' chars)' : 'NO');
             console.log('📦 User stored:', storedUser ? 'YES' : 'NO');
             
-            if (!storedToken) {
-                console.error('❌ CRITICAL: Token was not stored after login!');
-                setError('Login failed: Token not stored. Please try again.');
+            if (!storedUser) {
+                console.error('❌ CRITICAL: User was not stored after login!');
+                setError('Login failed: User not stored. Please try again.');
                 return;
             }
             

@@ -28,19 +28,17 @@ export default function Savings() {
         try {
             setLoading(true);
             
-            // Check if token exists before making request
-            const token = localStorage.getItem('token');
-            if (!token) {
-                console.error('No authentication token found. Redirecting to login...');
+            // Check if user exists before making request
+            const user = localStorage.getItem('user');
+            if (!user) {
+                console.error('No user found. Redirecting to login...');
                 alert('Please login to access savings data');
                 router.push('/auth/login');
                 return;
             }
             
             console.log('=== SAVINGS API CALL DEBUG ===');
-            console.log('Token exists:', !!token);
-            console.log('Token length:', token?.length);
-            console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'No token');
+            console.log('User exists:', !!user);
             
             const params = {};
             if (filterStatus && filterStatus !== 'all') {
@@ -51,16 +49,6 @@ export default function Savings() {
 
             console.log('Calling getAllMonthlySavings with params:', params);
             console.log('API endpoint will be: /api/savings/monthly/all');
-            
-            // Double-check token before making request
-            const tokenBeforeRequest = localStorage.getItem('token');
-            if (!tokenBeforeRequest) {
-                console.error('❌ CRITICAL: Token disappeared before API call!');
-                alert('Authentication error. Please login again.');
-                router.push('/auth/login');
-                return;
-            }
-            console.log('✅ Token verified before API call, length:', tokenBeforeRequest.length);
             
             const response = await savingsAPI.getAllMonthlySavings(params);
             console.log('=== API RESPONSE RECEIVED ===');

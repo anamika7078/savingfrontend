@@ -10,15 +10,13 @@ export default function ProtectedRoute({ children, adminOnly = false }) {
     useEffect(() => {
         // Small delay to ensure localStorage is available
         const timer = setTimeout(() => {
-            const token = localStorage.getItem('token');
             const userStr = localStorage.getItem('user');
             const user = userStr ? JSON.parse(userStr) : null;
 
-            console.log('ProtectedRoute - Token exists:', !!token);
             console.log('ProtectedRoute - User:', user);
 
-            if (!token) {
-                console.log('ProtectedRoute: No token, redirecting to login');
+            if (!user) {
+                console.log('ProtectedRoute: No user, redirecting to login');
                 router.push('/auth/login');
                 return;
             }

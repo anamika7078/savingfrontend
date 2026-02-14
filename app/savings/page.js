@@ -27,6 +27,16 @@ export default function Savings() {
     const fetchSavings = async () => {
         try {
             setLoading(true);
+            
+            // Check if token exists before making request
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No authentication token found. Redirecting to login...');
+                router.push('/auth/login');
+                return;
+            }
+            console.log('Token exists, proceeding with API call');
+            
             const params = {};
             if (filterStatus && filterStatus !== 'all') {
                 params.paymentStatus = filterStatus;

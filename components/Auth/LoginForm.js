@@ -28,12 +28,23 @@ export default function LoginForm() {
         setError('');
 
         try {
-            console.log('Attempting login with:', formData);
+            console.log('🔐 Attempting login with:', { username: formData.username });
             const result = await login(formData);
-            console.log('Login successful, result:', result);
-            console.log('Token stored:', localStorage.getItem('token'));
-            console.log('User stored:', localStorage.getItem('user'));
-            console.log('Redirecting to dashboard...');
+            console.log('✅ Login successful, result:', result);
+            
+            // Verify token is stored
+            const storedToken = localStorage.getItem('token');
+            const storedUser = localStorage.getItem('user');
+            console.log('📦 Token stored:', storedToken ? 'YES (' + storedToken.length + ' chars)' : 'NO');
+            console.log('📦 User stored:', storedUser ? 'YES' : 'NO');
+            
+            if (!storedToken) {
+                console.error('❌ CRITICAL: Token was not stored after login!');
+                setError('Login failed: Token not stored. Please try again.');
+                return;
+            }
+            
+            console.log('✅ Redirecting to dashboard...');
             router.push('/dashboard');
         } catch (err) {
             console.error('Login error:', err);

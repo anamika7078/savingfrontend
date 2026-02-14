@@ -31,27 +31,52 @@ export default function Savings() {
             if (filterStatus && filterStatus !== 'all') {
                 params.paymentStatus = filterStatus;
             }
+            // Remove pagination limit to get all records
+            params.limit = 10000;
 
             console.log('Calling getAllMonthlySavings with params:', params);
             const response = await savingsAPI.getAllMonthlySavings(params);
             console.log('Monthly savings API response:', response);
+            console.log('Response type:', typeof response);
+            console.log('Response keys:', response ? Object.keys(response) : 'null');
 
             // Handle different response structures
             let savingsData = [];
             if (response && response.data && response.data.monthlySavings) {
                 savingsData = response.data.monthlySavings;
+                console.log('Extracted from response.data.monthlySavings:', savingsData.length);
             } else if (response && response.monthlySavings) {
                 savingsData = response.monthlySavings;
+                console.log('Extracted from response.monthlySavings:', savingsData.length);
             } else if (Array.isArray(response)) {
                 savingsData = response;
+                console.log('Response is array:', savingsData.length);
             } else if (response && Array.isArray(response.data)) {
                 savingsData = response.data;
+                console.log('Extracted from response.data array:', savingsData.length);
+            } else {
+                console.warn('Unexpected response structure:', response);
             }
 
             console.log('Processed monthly savings data:', savingsData);
-            setSavings(savingsData);
+            console.log('Number of records:', savingsData.length);
+            setSavings(savingsData || []);
         } catch (error) {
             console.error('Error fetching monthly savings:', error);
+            console.error('Error details:', {
+                message: error?.message || error,
+                response: error?.response,
+                data: error?.data,
+                stack: error?.stack
+            });
+            // Show user-friendly error message
+            if (error?.message) {
+                alert(`Error loading savings: ${error.message}`);
+            } else if (typeof error === 'string') {
+                alert(`Error loading savings: ${error}`);
+            } else {
+                alert('Error loading savings. Please check the console for details.');
+            }
             setSavings([]);
         } finally {
             setLoading(false);

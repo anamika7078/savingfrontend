@@ -131,10 +131,10 @@ export default function Members() {
                                                 {member.email}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadge(member.status || (member.isActive ? 'active' : 'inactive'))}`}>
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadge(member.status || 'inactive')}`}>
                                                     {member.status 
                                                         ? member.status.charAt(0).toUpperCase() + member.status.slice(1) 
-                                                        : (member.isActive ? 'Active' : 'Inactive')}
+                                                        : 'Inactive'}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

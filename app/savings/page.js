@@ -32,10 +32,15 @@ export default function Savings() {
             const token = localStorage.getItem('token');
             if (!token) {
                 console.error('No authentication token found. Redirecting to login...');
+                alert('Please login to access savings data');
                 router.push('/auth/login');
                 return;
             }
-            console.log('Token exists, proceeding with API call');
+            
+            console.log('=== SAVINGS API CALL DEBUG ===');
+            console.log('Token exists:', !!token);
+            console.log('Token length:', token?.length);
+            console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'No token');
             
             const params = {};
             if (filterStatus && filterStatus !== 'all') {
@@ -45,7 +50,10 @@ export default function Savings() {
             params.limit = 10000;
 
             console.log('Calling getAllMonthlySavings with params:', params);
+            console.log('API endpoint will be: /api/savings/monthly/all');
+            
             const response = await savingsAPI.getAllMonthlySavings(params);
+            console.log('=== API RESPONSE RECEIVED ===');
             console.log('Monthly savings API response:', response);
             console.log('Response type:', typeof response);
             console.log('Response keys:', response ? Object.keys(response) : 'null');
